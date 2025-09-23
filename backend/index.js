@@ -29,5 +29,5 @@ app.use('/api/user', userRoutes);
 app.get('/', (req, res) => {
   res.send('Surety Member Management Backend API is running.');
 });
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+module.exports = app;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
