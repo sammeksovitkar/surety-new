@@ -34,5 +34,4 @@ app.get('/', (req, res) => {
 // The key for Vercel: export the Express app as a serverless function
 module.exports = app;
 
-// The app.listen is commented out because Vercel handles this for you.
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
