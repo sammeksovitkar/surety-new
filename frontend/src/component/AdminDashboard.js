@@ -21,6 +21,7 @@ const AdminDashboard = ({ setRole }) => {
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
+  const backend_Url= process.env.REACT_APP_BACKEND_URL
 
   // --- START OF FIXED CODE ---
   const userFileInputRef = useRef(null);
@@ -41,7 +42,7 @@ const AdminDashboard = ({ setRole }) => {
   };
 
   useEffect(() => {
-    fetchAdminData();
+    // fetchAdminData();
     if (view === 'users') {
       fetchUsers();
     } else if (view === 'sureties') {
@@ -51,7 +52,7 @@ const AdminDashboard = ({ setRole }) => {
 
   const fetchAdminData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/me', config);
+      const response = await axios.get(backend_Url+'/api/admin/me', config);
       setAdminUser(response.data);
     } catch (error) {
       console.error('Failed to fetch admin data.');
@@ -60,7 +61,7 @@ const AdminDashboard = ({ setRole }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/users', config);
+      const response = await axios.get(backend_Url+'/api/admin/users', config);
       setUsers(response.data);
     } catch (error) {
       toast.error(error.response?.data?.msg || 'Failed to fetch users.');
@@ -69,7 +70,7 @@ const AdminDashboard = ({ setRole }) => {
 
   const fetchSureties = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/sureties', config);
+      const response = await axios.get(backend_Url+'/api/admin/sureties', config);
       setSureties(response.data);
     } catch (error) {
       toast.error(error.response?.data?.msg || 'Failed to fetch sureties.');
@@ -116,16 +117,16 @@ const AdminDashboard = ({ setRole }) => {
     try {
       if (modalType === 'user') {
         const url = isEditing
-          ? `http://localhost:5000/api/admin/users/${currentRecord._id}`
-          : 'http://localhost:5000/api/admin/users';
+          ? `backend_Url/api/admin/users/${currentRecord._id}`
+          : backend_Url+'/api/admin/users';
         const method = isEditing ? 'put' : 'post';
         await axios[method](url, currentRecord, config);
         toast.success(`User ${isEditing ? 'updated' : 'created'} successfully!`);
         fetchUsers();
       } else {
         const url = isEditing
-          ? `http://localhost:5000/api/admin/sureties/${currentRecord._id}`
-          : 'http://localhost:5000/api/admin/sureties';
+          ? `backend_Url/api/admin/sureties/${currentRecord._id}`
+          : backend_Url+'/api/admin/sureties';
         const method = isEditing ? 'put' : 'post';
         await axios[method](url, currentRecord, config);
         toast.success(`Surety ${isEditing ? 'updated' : 'created'} successfully!`);
@@ -141,11 +142,11 @@ const AdminDashboard = ({ setRole }) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
         if (type === 'user') {
-          await axios.delete(`http://localhost:5000/api/admin/users/${id}`, config);
+          await axios.delete(`backend_Url/api/admin/users/${id}`, config);
           toast.success('User deleted successfully!');
           fetchUsers();
         } else {
-          await axios.delete(`http://localhost:5000/api/admin/sureties/${id}`, config);
+          await axios.delete(`backend_Url/api/admin/sureties/${id}`, config);
           toast.success('Surety deleted successfully!');
           fetchSureties();
         }
@@ -162,7 +163,7 @@ const AdminDashboard = ({ setRole }) => {
       const formData = new FormData();
       formData.append('file', file);
       
-      axios.post('http://localhost:5000/api/admin/users/import', formData, {
+      axios.post(backend_Url+'/api/admin/users/import', formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
@@ -194,7 +195,7 @@ const AdminDashboard = ({ setRole }) => {
       const formData = new FormData();
       formData.append('file', file);
     
-      axios.post('http://localhost:5000/api/admin/sureties/import', formData, {
+      axios.post(backend_Url+'/api/admin/sureties/import', formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
