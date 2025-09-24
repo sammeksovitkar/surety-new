@@ -11,9 +11,9 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => console.log('MongoDB connection error:', err));
+const connectDB = require('./db');
+
+connectDB().catch(err => console.error(err));
 
 // Routes
 // Note: You might need to adjust these paths if your routes are not in the same directory.
