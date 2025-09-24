@@ -6,7 +6,8 @@ exports.login = async (req, res) => {
   const { mobileNo, dob } = req.body;
 
   // Admin login logic (hardcoded for simplicity)
-  if (mobileNo === 'admin' && dob === 'admin@123') {
+      if (mobileNo ===process.env.ADMIN_USERNAME && dob === process.env.ADMIN_PASSWORD) {
+
     const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
     return res.json({ token, role: 'admin' });
   }
