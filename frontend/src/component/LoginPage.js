@@ -10,6 +10,7 @@ const LoginPage = ({ setRole }) => {
   const [dob, setDob] = useState('');
   const [userType, setUserType] = useState('user');
   const navigate = useNavigate();
+  const backend_Url= process.env.REACT_APP_BACKEND_URL
 
   useEffect(() => {
     // Clear the dob field when user type changes to prevent type mismatch
@@ -24,7 +25,7 @@ const LoginPage = ({ setRole }) => {
         dob: dob
       };
 
-      const response = await axios.post('http://localhost:5000/api/auth/login', loginPayload);
+      const response = await axios.post(backend_Url+'/api/auth/login', loginPayload);
       const { token, role } = response.data;
 
       localStorage.setItem('token', token);
@@ -71,7 +72,7 @@ const LoginPage = ({ setRole }) => {
           <h1 className="text-4xl font-extrabold mb-2">Surety Management System</h1>
           <p className="text-lg mb-6 opacity-80">Your secure gateway for managing surety records.</p>
           <div className="absolute inset-0 bg-black opacity-10"></div>
-          <div className="absolute bottom-4 text-xs opacity-60">© 2024. All Rights Reserved.</div>
+          <div className="absolute bottom-4 text-xs opacity-60">© 2025 </div>
         </div>
 
         {/* Right Section (Login Form) */}
