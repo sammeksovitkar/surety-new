@@ -18,6 +18,7 @@ const UserDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [aadharError, setAadharError] = useState('');
   const navigate = useNavigate();
+  const backend_Url= process.env.REACT_APP_BACKEND_URL
 
   const policeStations = [
     "Malegaon", "Manmad", "Nashik City", "Nashik Road", "Gangapur", "Panchavati",
@@ -47,7 +48,7 @@ const UserDashboard = () => {
 
   const fetchUserData = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/user/me', config);
+      const res = await axios.get(backend_Url+'/api/user/me', config);
       setUser(res.data);
     } catch (err) {
       console.error('Failed to fetch user data');
@@ -56,7 +57,7 @@ const UserDashboard = () => {
 
   const fetchSureties = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/user/allsureties', config);
+      const res = await axios.get(backend_Url+'/api/user/allsureties', config);
       setSureties(res.data);
     } catch (err) {
       showMessage('Failed to fetch surety records. Please ensure you have the necessary permissions.', 'error');
@@ -85,7 +86,7 @@ const UserDashboard = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/user/sureties', formData, config);
+      await axios.post(backend_Url+'/api/user/sureties', formData, config);
       showMessage('Surety record created successfully!', 'success');
       setFormData({
         shurityName: '', address: '', aadharNo: '', policeStation: '', caseFirNo: '',
