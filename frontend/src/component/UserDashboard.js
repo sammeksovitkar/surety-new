@@ -362,7 +362,7 @@ const UserDashboard = () => {
                                         className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-xl shadow-indigo-400/70 text-sm disabled:bg-indigo-400 disabled:shadow-none"
                                         disabled={!!aadharError}
                                     >
-                                        <FaPlus className="inline mr-2 text-xs"/> **Submit**
+                                       Submit
                                     </button>
 
                                     <button 
