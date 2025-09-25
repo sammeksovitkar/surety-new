@@ -151,7 +151,7 @@ const UserDashboard = () => {
 
     const MessageComponent = ({ message, type }) => {
         if (!message) return null;
-        const baseClasses = "py-3 px-6 rounded-xl font-medium text-white mb-4 transition-all duration-300 transform animate-fade-in flex items-center shadow-lg";
+        const baseClasses = "py-3 px-6 rounded-xl font-medium text-white mb-3 transition-all duration-300 transform animate-fade-in flex items-center shadow-lg"; // Adjusted mb-4 to mb-3
         const typeClasses = type === "success" ? "bg-green-500" : "bg-red-500";
         const Icon = type === "success" ? MdOutlineSecurity : FaTimesCircle;
         return (
@@ -162,11 +162,10 @@ const UserDashboard = () => {
         );
     };
 
-    // Form Input Component with minimum vertical space
+    // Form Input Component with minimum vertical space (used in Modal)
     const FormInput = ({ label, id, name, value, onChange, type = 'text', required = false, error, children, icon: Icon }) => (
-        // Adjusted mb-2 for reduced space
         <div className="flex flex-col mb-2"> 
-            <label htmlFor={id} className="text-xs font-medium text-gray-700 flex items-center mb-0.5"> {/* Reduced mb-1 to mb-0.5 */}
+            <label htmlFor={id} className="text-xs font-medium text-gray-700 flex items-center mb-0.5"> 
                 {Icon && <Icon className="mr-2 text-indigo-500 text-sm" />}
                 {label} {required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -179,7 +178,6 @@ const UserDashboard = () => {
                         value={value}
                         onChange={onChange}
                         required={required}
-                        // Reduced p-2 to p-1.5 for a tighter fit
                         className={`w-full p-1.5 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md transition-all duration-200 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm`}
                         maxLength={id === 'aadharNo' ? 12 : undefined}
                     />
@@ -230,15 +228,15 @@ const UserDashboard = () => {
             {/* Main Content Area */}
             <div className="flex-1 p-4 sm:p-8 lg:p-10">
                 
-                {/* Header and Buttons */}
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-gray-200">
+                {/* Header and Buttons (Extremely Compact) */}
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 pb-2 border-b border-gray-200"> {/* Reduced mb-4 to mb-3 and pb-3 to pb-2 */}
                     <div>
                         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Surety Records</h1>
-                        <p className="text-gray-500 mt-1">Manage and view all surety records assigned to your court area.</p>
+                        <p className="text-gray-500 mt-0 text-xs">Manage and view all surety records assigned to your court area.</p> {/* Reduced mt-0.5 to mt-0 and text-sm to text-xs */}
                     </div>
                     
                     {/* Action Buttons */}
-                    <div className="flex space-x-3 mt-4 md:mt-0">
+                    <div className="flex space-x-3 mt-2 md:mt-0"> {/* Reduced mt-3 to mt-2 */}
                         <button
                             onClick={() => setShowModal(true)}
                             className="px-5 py-2 rounded-xl bg-indigo-600 text-white font-semibold flex items-center hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-300/50 text-sm"
@@ -256,35 +254,37 @@ const UserDashboard = () => {
 
                 <MessageComponent message={message} type={messageType} />
 
-                {/* Filters (Enhanced) */}
-                <div className="bg-white p-6 rounded-2xl shadow-2xl mb-6 border border-gray-100">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-700"><FaFilter className="mr-2 text-sm text-indigo-600" /> Quick Filters</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                {/* Filters (ULTRA COMPACT) */}
+                <div className="bg-white p-2 rounded-xl shadow-xl mb-3 border border-gray-100"> {/* Reduced p-3 to p-2 and mb-4 to mb-3 */}
+                    <h3 className="text-sm font-semibold mb-1 flex items-center text-gray-700"><FaFilter className="mr-2 text-sm text-indigo-600" /> Quick Filters</h3> {/* Reduced text-md to text-sm and mb-2 to mb-1 */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2"> {/* Reduced gap-3 to gap-2 */}
+                        
+                        {/* Input Fields - p-1.5, rounded-md, text-sm */}
                         <input
                             type="text"
                             placeholder="Surety Name"
                             value={filters.name}
                             onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-                            className="p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner"
+                            className="p-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner"
                         />
                         <input
                             type="text"
                             placeholder="Aadhar No."
                             value={filters.aadharNo}
                             onChange={(e) => setFilters({ ...filters, aadharNo: e.target.value })}
-                            className="p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner"
+                            className="p-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner"
                         />
                         <input
                             type="text"
                             placeholder="Case/FIR No"
                             value={filters.caseNo}
                             onChange={(e) => setFilters({ ...filters, caseNo: e.target.value })}
-                            className="p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner"
+                            className="p-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner"
                         />
                         <select
                             value={filters.policeStation}
                             onChange={(e) => setFilters({ ...filters, policeStation: e.target.value })}
-                            className="p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner appearance-none bg-white"
+                            className="p-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-inner appearance-none bg-white"
                         >
                             <option value="">All Police Stations</option>
                             {policeStations.map((station) => (
@@ -294,40 +294,44 @@ const UserDashboard = () => {
                     </div>
                 </div>
 
-                {/* Table Container (Enhanced Styling) */}
+                {/* Table Container (FIXED FOR INTERNAL SCROLL) */}
                 <div className="bg-white rounded-2xl shadow-2xl p-0 border border-gray-100">
-                    <div className="overflow-x-auto overflow-y-auto rounded-2xl" style={{ maxHeight: "calc(100vh - 350px)" }}>
+                    <div 
+                        className="overflow-x-auto overflow-y-auto rounded-2xl" 
+                        // Added back fixed height and internal scroll
+                        style={{ maxHeight: "calc(100vh - 300px)" }} 
+                    > 
                         
-                        <table className="min-w-full divide-y divide-gray-200 table-fixed"> 
+                        <table className="min-w-full divide-y divide-gray-200 table-auto"> 
                             {/* Sticky Table Header */}
                             <thead className="bg-indigo-50 sticky top-0 z-10 shadow-md">
                                 <tr>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[100px]">Date</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[140px]">Surety Name</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[110px]">Aadhar No.</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[170px]">Address</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[100px]">P.S.</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[120px]">Case/FIR No.</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[90px]">Amount</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[140px]">Accused Name</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[170px]">Accused Address</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[100px]">Act Name</th>
-                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[80px]">Section</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[80px]">Date</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[120px]">Surety Name</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[100px]">Aadhar No.</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[140px]">Address</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[80px]">P.S.</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[100px]">Case/FIR No.</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[80px]">Amount</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[120px]">Accused Name</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[140px]">Accused Address</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[90px]">Act Name</th>
+                                    <th className="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider w-[60px]">Section</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-100">
                                 {filteredSureties.map(surety => (
                                     <tr key={surety._id} className="hover:bg-indigo-50 transition-colors duration-200">
                                         <td className="px-3 py-3 text-xs text-gray-800">{surety.dateOfSurety ? new Date(surety.dateOfSurety).toLocaleDateString() : 'N/A'}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-800 truncate font-medium">{surety.shurityName}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-800 truncate font-medium max-w-[120px]">{surety.shurityName}</td>
                                         <td className="px-3 py-3 text-xs text-gray-800">{surety.aadharNo}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-800 truncate">{surety.address}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-800 truncate">{surety.policeStation}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-800 truncate max-w-[140px]">{surety.address}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-800 truncate max-w-[80px]">{surety.policeStation}</td>
                                         <td className="px-3 py-3 text-xs text-gray-800 font-mono">{surety.caseFirNo}</td>
                                         <td className="px-3 py-3 text-xs text-green-700 font-semibold">{surety.shurityAmount}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-800 truncate">{surety.accusedName}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-800 truncate">{surety.accusedAddress}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-800 truncate">{surety.actName}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-800 truncate max-w-[120px]">{surety.accusedName}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-800 truncate max-w-[140px]">{surety.accusedAddress}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-800 truncate max-w-[90px]">{surety.actName}</td>
                                         <td className="px-3 py-3 text-xs text-gray-800">{surety.section}</td>
                                     </tr>
                                 ))}
@@ -337,10 +341,9 @@ const UserDashboard = () => {
                 </div>
 
 
-                {/* Modal Popup for adding Surety (Final Adjustment to prevent scroll) */}
+                {/* Modal Popup for adding Surety (No Internal Scroll - Unchanged) */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-                        {/* Adjusted max-w-5xl to max-w-4xl for better fit on some screens */}
                         <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] transform transition-all duration-300 scale-100"> 
                             
                             {/* Modal Header: Title, Actions, and Close Button - Fixed Position */}
@@ -359,7 +362,7 @@ const UserDashboard = () => {
                                         className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-xl shadow-indigo-400/70 text-sm disabled:bg-indigo-400 disabled:shadow-none"
                                         disabled={!!aadharError}
                                     >
-                                        Submit
+                                        <FaPlus className="inline mr-2 text-xs"/> **Submit**
                                     </button>
 
                                     <button 
@@ -376,14 +379,14 @@ const UserDashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Form Body - Removed max-height and overflow-y-auto on the form container */}
+                            {/* Form Body - No Scroll */}
                             <form onSubmit={handleSubmitSurety} id="suretyForm">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"> 
                                     
-                                    {/* Section 1: Surety Details - Reduced p-4 to p-3 */}
+                                    {/* Section 1: Surety Details */}
                                     <div className="bg-indigo-50 p-3 rounded-xl shadow-inner border border-indigo-200">
                                         <h3 className="text-md font-bold text-indigo-800 mb-3 border-b border-indigo-300 pb-1">Surety/Bailor Information</h3>
-                                        <div className="space-y-1"> {/* Reduced space-y-3 to space-y-1 */}
+                                        <div className="space-y-1"> 
                                             <FormInput label="Surety Name" id="shurityName" name="shurityName" value={formData.shurityName} onChange={handleFormChange} required />
                                             <FormInput label="Address" id="address" name="address" value={formData.address} onChange={handleFormChange} required />
                                             
@@ -430,10 +433,10 @@ const UserDashboard = () => {
                                         </div>
                                     </div>
 
-                                    {/* Section 2: Case & Accused Details - Reduced p-4 to p-3 */}
+                                    {/* Section 2: Case & Accused Details */}
                                     <div className="bg-gray-50 p-3 rounded-xl shadow-inner border border-gray-200">
                                         <h3 className="text-md font-bold text-gray-700 mb-3 border-b border-gray-300 pb-1">Case & Accused Information</h3>
-                                        <div className="space-y-1"> {/* Reduced space-y-3 to space-y-1 */}
+                                        <div className="space-y-1"> 
                                             <FormInput label="Case/FIR No." id="caseFirNo" name="caseFirNo" value={formData.caseFirNo} onChange={handleFormChange} required />
                                             <FormInput label="Act Name" id="actName" name="actName" value={formData.actName} onChange={handleFormChange} required />
                                             <FormInput label="Section" id="section" name="section" value={formData.section} onChange={handleFormChange} required />
