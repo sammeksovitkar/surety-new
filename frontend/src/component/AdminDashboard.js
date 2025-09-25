@@ -21,15 +21,15 @@ const AdminDashboard = ({ setRole }) => {
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  const backend_Url= process.env.REACT_APP_BACKEND_URL
+  const backend_Url = process.env.REACT_APP_BACKEND_URL
 
   // --- START OF FIXED CODE ---
   const userFileInputRef = useRef(null);
   const suretyFileInputRef = useRef(null);
   // --- END OF FIXED CODE ---
-  
+
   const policeStations = [
-    "Malegaon", "Manmad","Manmad Railway", "Nashik City", "Nashik Road", "Gangapur", "Panchavati",
+    "Malegaon", "Manmad", "Manmad Railway", "Nashik City", "Nashik Road", "Gangapur", "Panchavati",
     "Niphad", "Igatpuri", "Ghoti", "Wadivarhe", "Ozar", "Pimpalgaon Baswant",
     "Sinnar", "Laslgaon", "Wavi", "Saykheda", "MIDC Sinner", "Yeola", "Nandgaon",
     "Chandwad", "Vadner Bhairav", "Trimbakeshwar", "Harsul", "Kalwan", "Dindori",
@@ -52,7 +52,7 @@ const AdminDashboard = ({ setRole }) => {
 
   const fetchAdminData = async () => {
     try {
-      const response = await axios.get(backend_Url+'/api/admin/me', config);
+      const response = await axios.get(backend_Url + '/api/admin/me', config);
       setAdminUser(response.data);
     } catch (error) {
       console.error('Failed to fetch admin data.');
@@ -61,7 +61,7 @@ const AdminDashboard = ({ setRole }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(backend_Url+'/api/admin/users', config);
+      const response = await axios.get(backend_Url + '/api/admin/users', config);
       setUsers(response.data);
     } catch (error) {
       toast.error(error.response?.data?.msg || 'Failed to fetch users.');
@@ -70,7 +70,7 @@ const AdminDashboard = ({ setRole }) => {
 
   const fetchSureties = async () => {
     try {
-      const response = await axios.get(backend_Url+'/api/admin/sureties', config);
+      const response = await axios.get(backend_Url + '/api/admin/sureties', config);
       setSureties(response.data);
     } catch (error) {
       toast.error(error.response?.data?.msg || 'Failed to fetch sureties.');
@@ -92,9 +92,11 @@ const AdminDashboard = ({ setRole }) => {
         fullName: '', dob: '', mobileNo: '', village: '', emailId: '',
       });
     } else {
+      // 🌟 UPDATED: Added shurityAmount and shurityDate for new records 🌟
       setCurrentRecord({
         shurityName: '', address: '', aadharNo: '', policeStation: '', caseFirNo: '',
         actName: '', section: '', accusedName: '', accusedAddress: '',
+        shurityAmount: '', shurityDate: '', // NEW FIELDS INITIALIZED
       });
     }
     setIsModalOpen(true);
@@ -106,27 +108,32 @@ const AdminDashboard = ({ setRole }) => {
     if (type === 'user' && record.dob) {
       const formattedDob = record.dob.split('T')[0];
       setCurrentRecord({ ...record, dob: formattedDob });
-    } else {
+    } else if (type === 'surety' && record.shurityDate) {
+      // 🌟 UPDATED: Format shurityDate for editing 🌟
+      const formattedSuretyDate = record.shurityDate.split('T')[0];
+      setCurrentRecord({ ...record, shurityDate: formattedSuretyDate });
+    }
+    else {
       setCurrentRecord(record);
     }
     setIsModalOpen(true);
   };
-  
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       if (modalType === 'user') {
         const url = isEditing
-          ? `backend_Url/api/admin/users/${currentRecord._id}`
-          : backend_Url+'/api/admin/users';
+          ? `${backend_Url}/api/admin/users/${currentRecord._id}`
+          : `${backend_Url}/api/admin/users`;
         const method = isEditing ? 'put' : 'post';
         await axios[method](url, currentRecord, config);
         toast.success(`User ${isEditing ? 'updated' : 'created'} successfully!`);
         fetchUsers();
       } else {
         const url = isEditing
-          ? `backend_Url/api/admin/sureties/${currentRecord._id}`
-          : backend_Url+'/api/admin/sureties';
+          ? `${backend_Url}/api/admin/sureties/${currentRecord._id}`
+          : `${backend_Url}/api/admin/sureties`;
         const method = isEditing ? 'put' : 'post';
         await axios[method](url, currentRecord, config);
         toast.success(`Surety ${isEditing ? 'updated' : 'created'} successfully!`);
@@ -142,11 +149,11 @@ const AdminDashboard = ({ setRole }) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
         if (type === 'user') {
-          await axios.delete(`backend_Url/api/admin/users/${id}`, config);
+          await axios.delete(`${backend_Url}/api/admin/users/${id}`, config);
           toast.success('User deleted successfully!');
           fetchUsers();
         } else {
-          await axios.delete(`backend_Url/api/admin/sureties/${id}`, config);
+          await axios.delete(`${backend_Url}/api/admin/sureties/${id}`, config);
           toast.success('Surety deleted successfully!');
           fetchSureties();
         }
@@ -162,29 +169,29 @@ const AdminDashboard = ({ setRole }) => {
       setLoadingType('user');
       const formData = new FormData();
       formData.append('file', file);
-      
-      axios.post(backend_Url+'/api/admin/users/import', formData, {
+
+      axios.post(backend_Url + '/api/admin/users/import', formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
         },
       })
-      .then(response => {
-        toast.success(response.data.msg);
-        fetchUsers();
-      })
-      .catch(error => {
-        toast.error(error.response?.data?.msg || 'Import failed. Check file format and server.');
-        console.error('Import error:', error);
-      })
-      .finally(() => {
-        setLoadingType(null);
-        // --- START OF FIXED CODE ---
-        if (userFileInputRef.current) {
-          userFileInputRef.current.value = null;
-        }
-        // --- END OF FIXED CODE ---
-      });
+        .then(response => {
+          toast.success(response.data.msg);
+          fetchUsers();
+        })
+        .catch(error => {
+          toast.error(error.response?.data?.msg || 'Import failed. Check file format and server.');
+          console.error('Import error:', error);
+        })
+        .finally(() => {
+          setLoadingType(null);
+          // --- START OF FIXED CODE ---
+          if (userFileInputRef.current) {
+            userFileInputRef.current.value = null;
+          }
+          // --- END OF FIXED CODE ---
+        });
     }
   };
 
@@ -194,29 +201,29 @@ const AdminDashboard = ({ setRole }) => {
       setLoadingType('surety');
       const formData = new FormData();
       formData.append('file', file);
-    
-      axios.post(backend_Url+'/api/admin/sureties/import', formData, {
+
+      axios.post(backend_Url + '/api/admin/sureties/import', formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
         },
       })
-      .then(response => {
-        toast.success(response.data.msg);
-        fetchSureties();
-      })
-      .catch(error => {
-        toast.error(error.response?.data?.msg || 'Import failed. Check file format and server.');
-        console.error('Import error:', error);
-      })
-      .finally(() => {
-        setLoadingType(null);
-        // --- START OF FIXED CODE ---
-        if (suretyFileInputRef.current) {
-          suretyFileInputRef.current.value = null;
-        }
-        // --- END OF FIXED CODE ---
-      });
+        .then(response => {
+          toast.success(response.data.msg);
+          fetchSureties();
+        })
+        .catch(error => {
+          toast.error(error.response?.data?.msg || 'Import failed. Check file format and server.');
+          console.error('Import error:', error);
+        })
+        .finally(() => {
+          setLoadingType(null);
+          // --- START OF FIXED CODE ---
+          if (suretyFileInputRef.current) {
+            suretyFileInputRef.current.value = null;
+          }
+          // --- END OF FIXED CODE ---
+        });
     }
   };
 
@@ -228,7 +235,7 @@ const AdminDashboard = ({ setRole }) => {
     const dataBlob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(dataBlob, fileName);
   };
-  
+
   const handleExportUsers = () => {
     const usersData = filteredUsers.map(user => ({
       "Full Name": user.fullName,
@@ -250,7 +257,10 @@ const AdminDashboard = ({ setRole }) => {
       "Act Name": surety.actName,
       "Section": surety.section,
       "Accused Name": surety.accusedName,
-      "Accused Address": surety.accusedAddress
+      "Accused Address": surety.accusedAddress,
+      // 🌟 NEW EXPORT FIELDS 🌟
+      "Surety Amount": surety.shurityAmount,
+      "Surety Date": surety.shurityDate ? surety.shurityDate.split('T')[0] : '',
     }));
     exportToExcel(suretiesData, "Surety List.xlsx");
   };
@@ -276,7 +286,7 @@ const AdminDashboard = ({ setRole }) => {
             <FaTimes size={24} />
           </button>
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">{isEditing ? `Edit ${modalType}` : `Add New ${modalType}`}</h2>
-          
+
           <form onSubmit={handleUpdate}>
             {modalType === 'user' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-2xl shadow-inner border border-gray-200">
@@ -305,6 +315,7 @@ const AdminDashboard = ({ setRole }) => {
                 </div>
               </div>
             ) : (
+              // Surety Form with NEW FIELDS
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gray-50 p-6 rounded-2xl shadow-inner border border-gray-200">
                   <h3 className="text-xl font-semibold text-gray-700 mb-4">Surety Information</h3>
@@ -327,6 +338,16 @@ const AdminDashboard = ({ setRole }) => {
                         <option value="">Select Police Station</option>
                         {policeStations.map(station => <option key={station} value={station}>{station}</option>)}
                       </select>
+                    </div>
+                    {/* 🌟 NEW FIELD: Surety Amount 🌟 */}
+                    <div className="flex flex-col">
+                      <label htmlFor="shurityAmount" className="text-sm font-medium text-gray-600">Surety Amount (₹)</label>
+                      <input type="number" id="shurityAmount" name="shurityAmount" placeholder="e.g., 50000" value={currentRecord?.shurityAmount || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, shurityAmount: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                    </div>
+                    {/* 🌟 NEW FIELD: Surety Date 🌟 */}
+                    <div className="flex flex-col">
+                      <label htmlFor="shurityDate" className="text-sm font-medium text-gray-600">Surety Date</label>
+                      <input type="date" id="shurityDate" name="shurityDate" value={currentRecord?.shurityDate || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, shurityDate: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
                     </div>
                   </div>
                 </div>
@@ -530,6 +551,9 @@ const AdminDashboard = ({ setRole }) => {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Aadhar No.</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Police Station</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Case/FIR No.</th>
+                    {/* 🌟 NEW TABLE HEADERS 🌟 */}
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Surety Amount</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Surety Date</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -541,6 +565,9 @@ const AdminDashboard = ({ setRole }) => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.aadharNo}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.policeStation}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.caseFirNo}</td>
+                        {/* 🌟 NEW TABLE DATA 🌟 */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">₹{surety.shurityAmount ? surety.shurityAmount.toLocaleString('en-IN') : '-'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.shurityDate ? surety.shurityDate.split('T')[0] : '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex space-x-2">
                             <button onClick={() => handleEditClick(surety, 'surety')} className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
@@ -555,7 +582,7 @@ const AdminDashboard = ({ setRole }) => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="py-4 px-6 text-center text-gray-500">No surety records found.</td>
+                      <td colSpan="7" className="py-4 px-6 text-center text-gray-500">No surety records found.</td>
                     </tr>
                   )}
                 </tbody>
