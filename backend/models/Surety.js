@@ -5,7 +5,7 @@ const SuretySchema = new mongoose.Schema({
     address: { type: String },
     aadharNo: { type: String, unique: true },
     policeStation: { type: String },
-    caseFirNo: { type: String, unique: true },
+    caseFirNo: { type: String,  },
     actName: { type: String },
     section: { type: String },
     accusedName: { type: String },

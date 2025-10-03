@@ -9,7 +9,7 @@ router.get('/sureties', authMiddleware, userMiddleware, userController.getUserSu
 router.get('/allsureties', authMiddleware, userController.getAllSureties);
 
 // Dummy route to get user info, can be expanded
-router.get('/me', authMiddleware, userController.getMe);
+// router.get('/me', authMiddleware, userController.getMe);
 
 module.exports = router;
 

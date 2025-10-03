@@ -1,6 +1,6 @@
-const Hardware = require('../models/Hardware'); 
+const Surety = require('../models/Surety');
 const User = require('../models/User');
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
 
 // =========================================================
 // 🔥 HELPER FUNCTION: DATE PARSING (MUST BE DEFINED)
@@ -36,64 +36,67 @@ const safeDate = (dateString) => {
     return isNaN(genericDate.getTime()) ? null : genericDate;
 };
 
-
 // =========================================================
-// 🔥 CREATE HARDWARE (FIXED: Saves Name String directly)
+// 🔥 CREATE SINGLE SURETY
 // =========================================================
-exports.createHardware = async (req, res) => {
-    // employeeAllocated captures the name string from the payload
+exports.createSurety = async (req, res) => {
     const { 
-        employeeAllocated, 
-        hardwareItems,
+        shurityName, 
+        address, 
+        aadharNo, 
+        policeStation, 
+        caseFirNo, 
+        actName, 
+        section, 
+        accusedName, 
+        accusedAddress,
+        shurityAmount,
+        dateOfSurety,
         ...restOfBody
     } = req.body;
 
     const userId = req.user.id; 
     
-    // 1. Employee ID lookup is REMOVED. employeeAllocated (the name string) 
-    //    will be saved directly.
-    
-    // 2. Map Hardware Items
-    const mappedItems = hardwareItems.map(item => ({
-        itemName: item.hardwareName,
-        serialNo: item.serialNumber,
-        company: item.company 
-    }));
-    
-    // 3. Prepare the final document for save
-    const newHardware = new Hardware({
-        ...restOfBody,             
-        items: mappedItems,        
-        user: userId,              
-        
-        // 🔥 FIX: employeeAllocated field saves the name string from the request body.
-        employeeAllocated: employeeAllocated, 
-
-        deliveryDate: safeDate(restOfBody.deliveryDate),
-        installationDate: safeDate(restOfBody.installationDate),
-    });
-
     try {
-        const hardware = await newHardware.save();
-        res.status(201).json(hardware);
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        const newSurety = new Surety({
+            shurityName,
+            address,
+            aadharNo,
+            policeStation,
+            caseFirNo,
+            actName,
+            section,
+            accusedName,
+            accusedAddress,
+            shurityAmount,
+            dateOfSurety: safeDate(dateOfSurety),
+            assignedToUser: userId,
+            courtCity: user.village, // Assuming 'village' from the user model maps to 'courtCity'
+            ...restOfBody
+        });
+
+        await newSurety.save();
+        res.status(201).json({ msg: 'Surety created successfully', surety: newSurety });
     } catch (err) {
-        // NOTE: If your schema strictly requires an ObjectId for employeeAllocated, 
-        // this will fail with a CastError.
-        console.error('Server Error on Create:', err.message); 
-        res.status(500).json({ msg: `Server Error on Create: ${err.message}` });
+        console.error('Server Error on Create Surety:', err.message);
+        res.status(500).json({ msg: `Server Error: ${err.message}` });
     }
 };
 
-
 // =========================================================
-// 🔥 BATCH IMPORT HARDWARE (FIXED: Saves Name String and removes lookup)
+// 🔥 BATCH IMPORT SURETY
 // =========================================================
-exports.batchImportHardware = async (req, res) => {
+exports.batchImportSurety = async (req, res) => {
     const recordsToImport = req.body;
     const userId = req.user.id;
 
     if (!Array.isArray(recordsToImport) || recordsToImport.length === 0) {
-        return res.status(400).json({ msg: 'Import payload must be a non-empty array of hardware records.' });
+        return res.status(400).json({ msg: 'Import payload must be a non-empty array of surety records.' });
     }
 
     const session = await mongoose.startSession();
@@ -107,88 +110,30 @@ exports.batchImportHardware = async (req, res) => {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        const documentsToInsert = [];
-        let successCount = 0
-        
-       // Diagnostic Log (userController.js: Line 115 now)
-        if (recordsToImport.length > 0) {
-            // console.log('--- RAW RECORD SAMPLE ---', JSON.stringify(recordsToImport[0], null, 2));
-        }
+        const documentsToInsert = recordsToImport.map(record => ({
+            ...record,
+            dateOfSurety: safeDate(record.dateOfSurety),
+            assignedToUser: userId,
+            courtCity: user.village
+        }));
 
-        for (const record of recordsToImport) {
-            
-            // 1. Destructure employeeAllocated (the name) separately, and everything else
-            const { 
-                hardwareItems,              
-                employeeAllocated, // Captures the name string from the record
-                deliveryDate,               
-                installationDate,           
-                ...otherBodyFields          
-            } = record;
-            
-            // 2. Validate Items
-            if (!Array.isArray(hardwareItems) || hardwareItems.length === 0) {
-                console.warn(`Skipping record due to empty or missing hardwareItems: ${JSON.stringify(record)}`);
-                continue; 
-            }
-
-            // 3. Employee ID Resolution logic is REMOVED.
-            
-            // 4. Map Hardware Items
-            const mappedItems = hardwareItems.map(item => ({
-                itemName: item.hardwareName,
-                serialNo: item.serialNumber,
-                company: item.company 
-            }));
-
-            // 5. Prepare Final Document Structure
-            const newHardwareDoc = {
-                ...otherBodyFields, 
-                
-                deliveryDate: safeDate(deliveryDate),
-                installationDate: safeDate(installationDate),
-                
-                // 🔥 FIX: Saves the name string from the input record
-                employeeAllocated: employeeAllocated, 
-                
-                items: mappedItems, 
-                user: userId,
-            };
-
-            documentsToInsert.push(newHardwareDoc);
-            successCount++;
-        }
-        
-        // 6. Handle Case: No valid documents to insert
-        if (documentsToInsert.length === 0) {
-            await session.commitTransaction(); 
-            session.endSession();
-            return res.status(200).json({ 
-                msg: 'File processed, but no valid records were inserted after filtering.', 
-                count: 0 
-            });
-        }
-
-        // 7. Insert documents
-        await Hardware.insertMany(documentsToInsert, { session, ordered: false });
+        const result = await Surety.insertMany(documentsToInsert, { session, ordered: false });
         
         await session.commitTransaction();
         session.endSession();
         
-        // 8. Send final success response
         res.status(201).json({ 
-            msg: `Successfully imported ${successCount} hardware records.`, 
-            count: successCount 
+            msg: `Successfully imported ${result.length} surety records.`, 
+            count: result.length 
         });
 
     } catch (err) {
+        console.error('Batch Import Server Error:', err);
         await session.abortTransaction();
         session.endSession();
         
-        console.error('Batch Import Server Error:', err);
-        
         res.status(500).json({ 
-            msg: `Server failed to process the batch. A data error may exist in the file. Error: ${err.message}`,
+            msg: `Server failed to process the batch. Error: ${err.message}`,
             error: err.message, 
             count: 0
         });
@@ -196,142 +141,47 @@ exports.batchImportHardware = async (req, res) => {
 };
 
 // =========================================================
-// --- UPDATE HARDWARE ITEM (FIXED: Saves Name String directly) ---
+// 🔥 FETCH SURETIES FOR THE LOGGED-IN USER
 // =========================================================
-exports.updateHardwareItem = async (req, res) => {
-    const parentId = req.params.id;
-    const { hardwareItems, employeeAllocated, ...otherBodyFields } = req.body; // employeeAllocated is the name
-    
-    const itemToUpdate = hardwareItems?.[0]; 
-    if (!itemToUpdate || !itemToUpdate._id) {
-        return res.status(400).json({ msg: 'Item ID (_id) and update data are required.' });
-    }
-    
-    // Employee ID lookup is REMOVED. employeeAllocated (the name string) 
-    // will be used directly.
-
+exports.getUserSureties = async (req, res) => {
     try {
-        // 1. Update the parent document's fields (courtName, dates, employeeAllocated name, etc.)
-        await Hardware.findByIdAndUpdate(
-            parentId,
-            { 
-                $set: { 
-                    ...otherBodyFields,
-                    // 🔥 FIX: Use the name string directly for update
-                    employeeAllocated: employeeAllocated, 
-                    deliveryDate: safeDate(otherBodyFields.deliveryDate),
-                    installationDate: safeDate(otherBodyFields.installationDate),
-                } 
-            },
-            { new: true, runValidators: true }
-        );
-
-        // 2. Update the specific subdocument (item details)
-        const subDocUpdate = await Hardware.findOneAndUpdate(
-            { "_id": parentId, "items._id": itemToUpdate._id },
-            { 
-                $set: { 
-                    "items.$.itemName": itemToUpdate.hardwareName,
-                    "items.$.serialNo": itemToUpdate.serialNumber,
-                    "items.$.company": itemToUpdate.company
-                } 
-            },
-            { new: true, runValidators: true }
-        )/*.populate('employeeAllocated', 'fullName mobileNo')*/; // 👈 REMOVED POPULATE
-
-        if (!subDocUpdate) {
-            return res.status(404).json({ msg: 'Hardware item (subdocument) not found within the record.' });
-        }
-
-        res.json({ msg: 'Hardware item and metadata updated successfully', hardware: subDocUpdate });
-
+        const sureties = await Surety.find({ assignedToUser: req.user.id });
+        res.json(sureties);
     } catch (err) {
-        console.error('Server Error on Update:', err.message);
+        console.error(err.message);
         res.status(500).json({ msg: 'Server error' });
     }
 };
 
 // =========================================================
-// --- DELETE HARDWARE ITEM (EXISTING LOGIC) ---
+// 🔥 FETCH ALL SURETIES (ADMIN/SUPERUSER ACCESS)
 // =========================================================
-exports.deleteHardwareItem = async (req, res) => {
-    const parentId = req.params.parentId; 
-    const itemId = req.params.itemId;
+exports.getAllSureties = async (req, res) => {
+    try {
+        // Populating the user details makes the response more informative
+        const sureties = await Surety.find().populate('assignedToUser', 'fullName mobileNo');
+        res.json(sureties);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+};
+
+// =========================================================
+// 🔥 DELETE SURETY
+// =========================================================
+exports.deleteSurety = async (req, res) => {
+    const suretyId = req.params.id;
 
     try {
-        const updatedRecord = await Hardware.findByIdAndUpdate(
-            parentId, 
-            { $pull: { items: { _id: itemId } } },
-            { new: true }
-        );
+        const deletedSurety = await Surety.findByIdAndDelete(suretyId);
 
-        if (!updatedRecord) {
-            return res.status(404).json({ msg: 'Parent hardware record not found.' });
+        if (!deletedSurety) {
+            return res.status(404).json({ msg: 'Surety record not found.' });
         }
-        res.json({ msg: 'Hardware item deleted successfully', hardware: updatedRecord });
+        res.json({ msg: 'Surety record deleted successfully' });
     } catch (err) {
         console.error('Server Error on Delete:', err.message);
-        res.status(500).json({ msg: 'Server error' });
-    }
-};
-
-// =========================================================
-// --- FETCH FUNCTIONS (FIXED: Removed unnecessary populate) ---
-// =========================================================
-exports.getUserHardware = async (req, res) => {
-    // NOTE: This function currently queries by ID. If employeeAllocated is now a string name, 
-    // this query will NOT work as intended. I've left the query as is, but removed populate.
-    try {
-        const hardware = await Hardware.find({ employeeAllocated: req.user.id })
-            /*.populate('employeeAllocated', 'fullName mobileNo')*/; // 👈 REMOVED POPULATE
-        res.json(hardware);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ msg: 'Server error' });
-    }
-};
-
-exports.getMe = async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id).select('-password');
-        if (!user) {
-            return res.status(404).json({ msg: 'User not found' });
-        }
-        res.json(user);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ msg: 'Server error' });
-    }
-};
-
-exports.getAllHardware = async (req, res) => {
-    try {
-        const hardwareRecords = await Hardware.find(); // NO POPULATE NEEDED
-
-        // FLATTEN THE DATA FOR FRONTEND CONSUMPTION
-        const flatHardwareList = hardwareRecords.flatMap(record => {
-            return record.items.map(item => ({
-                _id: item._id, 
-                parentId: record._id, 
-                hardwareName: item.itemName, 
-                serialNumber: item.serialNo, 
-                courtName: record.courtName,
-                companyName: record.companyName,
-                deliveryDate: record.deliveryDate,
-                installationDate: record.installationDate,
-                deadStockRegSrNo: record.deadStockRegSrNo,
-                deadStockBookPageNo: record.deadStockBookPageNo,
-                source: record.source,
-                company:item.company,
-                // employeeAllocated is now the name string, ready for display
-                employeeAllocated: record.employeeAllocated, 
-                user: record.user 
-            }));
-        });
-
-        res.json(flatHardwareList);
-    } catch (err) {
-        console.error(err.message);
         res.status(500).json({ msg: 'Server error' });
     }
 };
