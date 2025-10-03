@@ -99,7 +99,6 @@ const AdminDashboard = ({ setRole }) => {
 
 
     useEffect(() => {
-        fetchAdminData();
         if (view === 'users') {
             fetchUsers();
             // Reset surety filters when switching view
@@ -109,15 +108,8 @@ const AdminDashboard = ({ setRole }) => {
         }
     }, [view]);
 
-    // ... (fetchAdminData, fetchUsers, fetchSureties, handleLogout remain unchanged) ...
-    const fetchAdminData = async () => {
-        try {
-            const response = await axios.get(backend_Url + '/api/admin/me', config);
-            setAdminUser(response.data);
-        } catch (error) {
-            console.error('Failed to fetch admin data.');
-        }
-    };
+    // ... ( fetchUsers, fetchSureties, handleLogout remain unchanged) ...
+   
 
     const fetchUsers = async () => {
         try {
