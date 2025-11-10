@@ -275,7 +275,8 @@ const UserDashboard = () => {
                     <div className="flex flex-col overflow-hidden">
                         <span className="text-xs text-indigo-500">Logged in as</span>
                         <span className="font-bold text-base text-indigo-800 truncate">{user?.fullName || 'Court User'}</span>
-                    </div>
+      <span className="font-bold text-base text-indigo-800 truncate">{user?.village || 'Court User'}</span>                
+    </div>
                 </div>
                 
                 <nav className="flex-1 space-y-2 overflow-y-auto">
