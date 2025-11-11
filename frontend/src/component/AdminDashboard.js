@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'; // <-- ADDED useCallback
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
@@ -98,6 +98,33 @@ const AdminDashboard = ({ setRole }) => {
     // --- End Environment & Refs ---
 
 
+    // ---------------------------------------------------------------------
+    // 🌟 FIX: Wrap fetching functions in useCallback for stability 🌟
+    // ---------------------------------------------------------------------
+    const fetchUsers = useCallback(async () => {
+        try {
+            const response = await axios.get(backend_Url + '/api/admin/users', config);
+            setUsers(response.data);
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Failed to fetch users.');
+        }
+    }, [backend_Url, token]); // Dependencies: URL and token (used in config)
+
+    const fetchSureties = useCallback(async () => {
+        try {
+            const response = await axios.get(backend_Url + '/api/admin/sureties', config);
+            setSureties(response.data);
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Failed to fetch sureties.');
+        }
+    }, [backend_Url, token]); // Dependencies: URL and token (used in config)
+
+    // Note: If you have a fetchAdminData function, it also needs to be wrapped.
+
+    // ---------------------------------------------------------------------
+    // 🌟 FIX: Update useEffect dependencies 🌟
+    // Now that fetchUsers and fetchSureties are stable, we can safely use them.
+    // ---------------------------------------------------------------------
     useEffect(() => {
         if (view === 'users') {
             fetchUsers();
@@ -106,28 +133,7 @@ const AdminDashboard = ({ setRole }) => {
         } else if (view === 'sureties') {
             fetchSureties();
         }
-    }, [view]);
-
-    // ... ( fetchUsers, fetchSureties, handleLogout remain unchanged) ...
-   
-
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get(backend_Url + '/api/admin/users', config);
-            setUsers(response.data);
-        } catch (error) {
-            toast.error(error.response?.data?.msg || 'Failed to fetch users.');
-        }
-    };
-
-    const fetchSureties = async () => {
-        try {
-            const response = await axios.get(backend_Url + '/api/admin/sureties', config);
-            setSureties(response.data);
-        } catch (error) {
-            toast.error(error.response?.data?.msg || 'Failed to fetch sureties.');
-        }
-    };
+    }, [view, fetchUsers, fetchSureties]); // <-- ADDED fetchUsers, fetchSureties
 
     const handleLogout = () => {
         localStorage.clear();
@@ -578,76 +584,98 @@ const AdminDashboard = ({ setRole }) => {
                 </header>
 
                 <div className="bg-white p-6 rounded-3xl shadow-xl">
-                    <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-700">
-                        <FaFilter className="mr-2" /> Filter Records
-                    </h3>
-                    
-                    {/* --- Filter Bar --- */}
-                    <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        
-                        {/* 1. General Text Filter */}
-                        <div className='lg:col-span-1 md:col-span-2 lg:md:col-span-1'>
-                            <FormInput
-                                label={view === 'users' ? "Search (Mobile, Name, Email)" : "Search (Surety Name or FIR No.)"}
-                                id="filter"
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value)}
-                            />
+                    {/* --- Filter Section for Sureties (UNCHANGED DESIGN) --- */}
+                    {view === 'sureties' && (
+                        <div className="mb-6 border-b border-gray-200 pb-4">
+                            <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-700">
+                                <FaFilter className="mr-2" /> Filter Sureties
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <FormInput 
+                                    label="Police Station" 
+                                    id="filterPoliceStation" 
+                                    icon={FaBuilding}
+                                >
+                                    <select 
+                                        value={suretyFilters.policeStation} 
+                                        onChange={(e) => setSuretyFilters({...suretyFilters, policeStation: e.target.value})}
+                                        className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                                    >
+                                        <option value="">All Stations</option>
+                                        {policeStations.map(station => <option key={station} value={station}>{station}</option>)}
+                                    </select>
+                                </FormInput>
+                                
+                                <FormInput 
+                                    label="Year" 
+                                    id="filterYear" 
+                                    icon={FaCalendarAlt}
+                                >
+                                    <select 
+                                        value={suretyFilters.filterYear} 
+                                        onChange={(e) => setSuretyFilters({...suretyFilters, filterYear: e.target.value})}
+                                        className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                                    >
+                                        <option value="">All Years</option>
+                                        {YEARS.map(year => <option key={year} value={year}>{year}</option>)}
+                                    </select>
+                                </FormInput>
+
+                                <FormInput 
+                                    label="Month" 
+                                    id="filterMonth" 
+                                    icon={FaCalendarAlt}
+                                >
+                                    <select 
+                                        value={suretyFilters.filterMonth} 
+                                        onChange={(e) => setSuretyFilters({...suretyFilters, filterMonth: e.target.value})}
+                                        className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                                    >
+                                        <option value="">All Months</option>
+                                        {MONTHS.map(month => <option key={month.value} value={month.value}>{month.label}</option>)}
+                                    </select>
+                                </FormInput>
+
+                                {/* Combined Text Search Filter */}
+                                <FormInput label="Search" id="textFilter" icon={FaFilter}>
+                                    <input
+                                        type="text"
+                                        placeholder="Name or FIR No."
+                                        value={filter}
+                                        onChange={(e) => setFilter(e.target.value)}
+                                        className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                </FormInput>
+                                
+                            </div>
+                            <button
+                                onClick={() => setSuretyFilters({ policeStation: '', filterYear: '', filterMonth: '' })}
+                                className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
+                            >
+                                <FaTimes className="mr-2" /> Clear Filters
+                            </button>
                         </div>
-                        
-                        {/* 2. Police Station Filter (Only for Sureties view) */}
-                        {view === 'sureties' && (
-                             <FormInput label="Police Station" id="suretyFilterPS" icon={FaBuilding}>
-                                <select
-                                    value={suretyFilters.policeStation}
-                                    onChange={(e) => setSuretyFilters({ ...suretyFilters, policeStation: e.target.value })}
-                                    className="w-full p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm appearance-none bg-white pr-10"
-                                >
-                                    <option value="">All Stations</option>
-                                    {policeStations.map((station) => (
-                                        <option key={station} value={station}>{station}</option>
-                                    ))}
-                                </select>
-                            </FormInput>
-                        )}
-
-                        {/* 3. Year Filter (Only for Sureties view) */}
-                        {view === 'sureties' && (
-                             <FormInput label="Surety Year" id="suretyFilterYear" icon={FaCalendarAlt}>
-                                <select
-                                    value={suretyFilters.filterYear}
-                                    onChange={(e) => setSuretyFilters({ ...suretyFilters, filterYear: e.target.value })}
-                                    className="w-full p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm appearance-none bg-white pr-10"
-                                >
-                                    <option value="">All Years</option>
-                                    {YEARS.map((year) => (
-                                        <option key={year} value={year}>{year}</option>
-                                    ))}
-                                </select>
-                            </FormInput>
-                        )}
-                        
-                        {/* 4. Month Filter (Only for Sureties view) */}
-                        {view === 'sureties' && (
-                            <FormInput label="Surety Month" id="suretyFilterMonth" icon={FaCalendarAlt}>
-                                <select
-                                    value={suretyFilters.filterMonth}
-                                    onChange={(e) => setSuretyFilters({ ...suretyFilters, filterMonth: e.target.value })}
-                                    className="w-full p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm appearance-none bg-white pr-10"
-                                >
-                                    <option value="">All Months</option>
-                                    {MONTHS.map((month) => (
-                                        <option key={month.value} value={month.value}>{month.label}</option>
-                                    ))}
-                                </select>
-                            </FormInput>
-                        )}
-                        
-                    </div>
-                    {/* --- End Filter Bar --- */}
+                    )}
+                    {/* --- Filter Section for Users (Old Simple Filter) --- */}
+                    {view === 'users' && (
+                        <>
+                            <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-700">
+                                <FaFilter className="mr-2" /> Filter Records
+                            </h3>
+                            <div className="mb-6 relative">
+                                <input
+                                    type="text"
+                                    placeholder="Filter by mobile number, DOB, name, or email..."
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+                        </>
+                    )}
 
 
-                    <div className="overflow-x-auto rounded-xl shadow-inner-lg" style={{ maxHeight: "calc(100vh - 350px)" }}>
+                    <div className="overflow-x-auto rounded-xl shadow-inner-lg" style={{ maxHeight: "calc(100vh - 452px)" }}>
                         {view === 'users' && (
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-100 sticky top-0 z-10">
@@ -698,6 +726,7 @@ const AdminDashboard = ({ setRole }) => {
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Aadhar No.</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Police Station</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Case/FIR No.</th>
+                                        {/* 🌟 NEW TABLE HEADERS 🌟 */}
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Surety Amount</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Surety Date</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
@@ -711,12 +740,9 @@ const AdminDashboard = ({ setRole }) => {
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.aadharNo}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.policeStation}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.caseFirNo}</td>
+                                                {/* 🌟 NEW TABLE DATA 🌟 */}
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">₹{surety.shurityAmount ? surety.shurityAmount.toLocaleString('en-IN') : '-'}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                                                    {surety.dateOfSurety 
-                                                        ? new Date(surety.dateOfSurety).toLocaleDateString('en-IN') 
-                                                        : '-'}
-                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{surety.dateOfSurety ? surety.dateOfSurety.split('T')[0] : '-'}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                     <div className="flex space-x-2">
                                                         <button onClick={() => handleEditClick(surety, 'surety')} className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
@@ -731,7 +757,7 @@ const AdminDashboard = ({ setRole }) => {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="7" className="py-4 px-6 text-center text-gray-500">No surety records found matching the current filters.</td>
+                                            <td colSpan="8" className="py-4 px-6 text-center text-gray-500">No sureties found matching the current filters.</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -739,8 +765,6 @@ const AdminDashboard = ({ setRole }) => {
                         )}
                     </div>
                 </div>
-
-                {renderModal()}
             </div>
         </div>
     );
