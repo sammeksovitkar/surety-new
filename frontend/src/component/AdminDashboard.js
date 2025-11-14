@@ -597,7 +597,7 @@ const AdminDashboard = ({ setRole }) => {
                             <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-700">
                                 <FaFilter className="mr-2" /> Filter Sureties
                             </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="flex flex-col lg:flex-row flex-wrap gap-4">
                                 <FormInput 
                                     label="Police Station" 
                                     id="filterPoliceStation" 
@@ -655,12 +655,12 @@ const AdminDashboard = ({ setRole }) => {
                                 </FormInput>
                                 
                             </div>
-                            <button
-                                onClick={() => setSuretyFilters({ policeStation: '', filterYear: '', filterMonth: '' })}
-                                className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
-                            >
-                                <FaTimes className="mr-2" /> Clear Filters
-                            </button>
+                            // <button
+                            //     onClick={() => setSuretyFilters({ policeStation: '', filterYear: '', filterMonth: '' })}
+                            //     className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
+                            // >
+                            //     <FaTimes className="mr-2" /> Clear Filters
+                            // </button>
                         </div>
                     )}
                     {/* --- Filter Section for Users (Old Simple Filter) --- */}
