@@ -492,6 +492,13 @@ const AdminDashboard = ({ setRole }) => {
     return (
         <div className="flex min-h-screen bg-gray-50 font-sans text-gray-800">
             <ToastContainer />
+        {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+                <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]">
+                    {renderModal()}
+                </div>
+            </div>
+        )}
             {/* Sidebar (Unchanged) */}
             <div className="hidden md:flex w-64 bg-white border-r border-gray-200 p-6 flex-col shadow-lg">
                 <div className="flex items-center mb-8">
