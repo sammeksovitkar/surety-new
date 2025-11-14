@@ -376,130 +376,132 @@ const AdminDashboard = ({ setRole }) => {
     // --- End of Filtering Logic ---
 
 
-    const renderModal = () => {
-        if (!isModalOpen) return null;
-        return (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-3xl p-8 shadow-xl relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 transition-colors">
-                        <FaTimes size={24} />
-                    </button>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">{isEditing ? `Edit ${modalType}` : `Add New ${modalType}`}</h2>
+  const renderModal = () => {
+    if (!isModalOpen) return null;
+    return (
+        // 🌟 UPDATED: Z-index set to z-[9999] to prevent click-blocking by other elements 🌟
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 z-[9999]">
+            <div className="bg-white rounded-3xl p-8 shadow-xl relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 transition-colors">
+                    <FaTimes size={24} />
+                </button>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">{isEditing ? `Edit ${modalType}` : `Add New ${modalType}`}</h2>
 
-                    <form onSubmit={handleUpdate}>
-                        {modalType === 'user' ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-2xl shadow-inner border border-gray-200">
-                                <div className="flex flex-col">
-                                    <label htmlFor="fullName" className="text-sm font-medium text-gray-600">Full Name</label>
-                                    <input type="text" id="fullName" name="fullName" placeholder="Full Name" value={currentRecord?.fullName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, fullName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <label htmlFor="mobileNo" className="text-sm font-medium text-gray-600">Mobile No.</label>
-                                    <input type="text" id="mobileNo" name="mobileNo" placeholder="Mobile No." value={currentRecord?.mobileNo || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, mobileNo: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" maxLength="10" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <label htmlFor="dob" className="text-sm font-medium text-gray-600">Date of Birth</label>
-                                    <input type="date" id="dob" name="dob" value={currentRecord?.dob || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, dob: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <label htmlFor="village" className="text-sm font-medium text-gray-600">Village / Court City</label>
-                                    <select id="village" name="village" value={currentRecord?.village || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, village: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
-                                        <option value="">Select Village / City</option>
-                                        {policeStations.map(station => <option key={station} value={station}>{station}</option>)}
-                                    </select>
-                                </div>
-                                <div className="flex flex-col">
-                                    <label htmlFor="emailId" className="text-sm font-medium text-gray-600">Email ID</label>
-                                    <input type="email" id="emailId" name="emailId" placeholder="Email ID" value={currentRecord?.emailId || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, emailId: e.target.value })} className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                </div>
+                <form onSubmit={handleUpdate}>
+                    {modalType === 'user' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-2xl shadow-inner border border-gray-200">
+                            <div className="flex flex-col">
+                                <label htmlFor="fullName" className="text-sm font-medium text-gray-600">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" placeholder="Full Name" value={currentRecord?.fullName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, fullName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
                             </div>
-                        ) : (
-                            // Surety Form
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-gray-50 p-6 rounded-2xl shadow-inner border border-gray-200">
-                                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Surety Information</h3>
-                                    <div className="space-y-4">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="shurityName" className="text-sm font-medium text-gray-600">Surety Name</label>
-                                            <input type="text" id="shurityName" name="shurityName" value={currentRecord?.shurityName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, shurityName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="address" className="text-sm font-medium text-gray-600">Address</label>
-                                            <input type="text" id="address" name="address" value={currentRecord?.address || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, address: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="aadharNo" className="text-sm font-medium text-gray-600">Aadhar No. (12 digits)</label>
-                                            <input type="text" id="aadharNo" name="aadharNo" value={currentRecord?.aadharNo || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, aadharNo: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" maxLength="12" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="policeStation" className="text-sm font-medium text-gray-600">Police Station</label>
-                                            <select id="policeStation" name="policeStation" value={currentRecord?.policeStation || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, policeStation: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
-                                                <option value="">Select Police Station</option>
-                                                {policeStations.map(station => <option key={station} value={station}>{station}</option>)}
-                                            </select>
-                                        </div>
-                                        {/* Surety Amount */}
-                                        <div className="flex flex-col">
-                                            <label htmlFor="shurityAmount" className="text-sm font-medium text-gray-600">Surety Amount (₹)</label>
-                                            <input type="number" id="shurityAmount" name="shurityAmount" placeholder="e.g., 50000" value={currentRecord?.shurityAmount || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, shurityAmount: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                        {/* Surety Date */}
-                                        <div className="flex flex-col">
-                                            <label htmlFor="dateOfSurety" className="text-sm font-medium text-gray-600">Surety Date</label>
-                                            <input type="date" id="dateOfSurety" name="dateOfSurety" value={currentRecord?.dateOfSurety || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, dateOfSurety: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-50 p-6 rounded-2xl shadow-inner border border-gray-200">
-                                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Accused Information</h3>
-                                    <div className="space-y-4">
-                                        <div className="flex flex-col">
-                                            <label htmlFor="caseFirNo" className="text-sm font-medium text-gray-600">Case/FIR No.</label>
-                                            <input type="text" id="caseFirNo" name="caseFirNo" value={currentRecord?.caseFirNo || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, caseFirNo: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="actName" className="text-sm font-medium text-gray-600">Act Name</label>
-                                            <input type="text" id="actName" name="actName" value={currentRecord?.actName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, actName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="section" className="text-sm font-medium text-gray-600">Section</label>
-                                            <input type="text" id="section" name="section" value={currentRecord?.section || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, section: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="accusedName" className="text-sm font-medium text-gray-600">Accused Name</label>
-                                            <input type="text" id="accusedName" name="accusedName" value={currentRecord?.accusedName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, accusedName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="accusedAddress" className="text-sm font-medium text-gray-600">Accused Address</label>
-                                            <input type="text" id="accusedAddress" name="accusedAddress" value={currentRecord?.accusedAddress || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, accusedAddress: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="flex flex-col">
+                                <label htmlFor="mobileNo" className="text-sm font-medium text-gray-600">Mobile No.</label>
+                                <input type="text" id="mobileNo" name="mobileNo" placeholder="Mobile No." value={currentRecord?.mobileNo || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, mobileNo: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" maxLength="10" />
                             </div>
-                        )}
-                        <div className="flex justify-end space-x-4 mt-6">
-                            <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors">Cancel</button>
-                            <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                                {isEditing ? 'Save Changes' : 'Create'}
-                            </button>
+                            <div className="flex flex-col">
+                                <label htmlFor="dob" className="text-sm font-medium text-gray-600">Date of Birth</label>
+                                <input type="date" id="dob" name="dob" value={currentRecord?.dob || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, dob: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                            </div>
+                            <div className="flex flex-col">
+                                <label htmlFor="village" className="text-sm font-medium text-gray-600">Village / Court City</label>
+                                <select id="village" name="village" value={currentRecord?.village || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, village: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                    <option value="">Select Village / City</option>
+                                    {policeStations.map(station => <option key={station} value={station}>{station}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex flex-col">
+                                <label htmlFor="emailId" className="text-sm font-medium text-gray-600">Email ID</label>
+                                <input type="email" id="emailId" name="emailId" placeholder="Email ID" value={currentRecord?.emailId || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, emailId: e.target.value })} className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                            </div>
                         </div>
-                    </form>
-                </div>
+                    ) : (
+                        // Surety Form
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="bg-gray-50 p-6 rounded-2xl shadow-inner border border-gray-200">
+                                <h3 className="text-xl font-semibold text-gray-700 mb-4">Surety Information</h3>
+                                <div className="space-y-4">
+                                    <div className="flex flex-col">
+                                        <label htmlFor="shurityName" className="text-sm font-medium text-gray-600">Surety Name</label>
+                                        <input type="text" id="shurityName" name="shurityName" value={currentRecord?.shurityName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, shurityName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="address" className="text-sm font-medium text-gray-600">Address</label>
+                                        <input type="text" id="address" name="address" value={currentRecord?.address || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, address: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="aadharNo" className="text-sm font-medium text-gray-600">Aadhar No. (12 digits)</label>
+                                        <input type="text" id="aadharNo" name="aadharNo" value={currentRecord?.aadharNo || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, aadharNo: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" maxLength="12" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="policeStation" className="text-sm font-medium text-gray-600">Police Station</label>
+                                        <select id="policeStation" name="policeStation" value={currentRecord?.policeStation || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, policeStation: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                            <option value="">Select Police Station</option>
+                                            {policeStations.map(station => <option key={station} value={station}>{station}</option>)}
+                                        </select>
+                                    </div>
+                                    {/* Surety Amount */}
+                                    <div className="flex flex-col">
+                                        <label htmlFor="shurityAmount" className="text-sm font-medium text-gray-600">Surety Amount (₹)</label>
+                                        <input type="number" id="shurityAmount" name="shurityAmount" placeholder="e.g., 50000" value={currentRecord?.shurityAmount || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, shurityAmount: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    {/* Surety Date */}
+                                    <div className="flex flex-col">
+                                        <label htmlFor="dateOfSurety" className="text-sm font-medium text-gray-600">Surety Date</label>
+                                        <input type="date" id="dateOfSurety" name="dateOfSurety" value={currentRecord?.dateOfSurety || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, dateOfSurety: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 p-6 rounded-2xl shadow-inner border border-gray-200">
+                                <h3 className="text-xl font-semibold text-gray-700 mb-4">Accused Information</h3>
+                                <div className="space-y-4">
+                                    <div className="flex flex-col">
+                                        <label htmlFor="caseFirNo" className="text-sm font-medium text-gray-600">Case/FIR No.</label>
+                                        <input type="text" id="caseFirNo" name="caseFirNo" value={currentRecord?.caseFirNo || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, caseFirNo: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="actName" className="text-sm font-medium text-gray-600">Act Name</label>
+                                        <input type="text" id="actName" name="actName" value={currentRecord?.actName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, actName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="section" className="text-sm font-medium text-gray-600">Section</label>
+                                        <input type="text" id="section" name="section" value={currentRecord?.section || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, section: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="accusedName" className="text-sm font-medium text-gray-600">Accused Name</label>
+                                        <input type="text" id="accusedName" name="accusedName" value={currentRecord?.accusedName || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, accusedName: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label htmlFor="accusedAddress" className="text-sm font-medium text-gray-600">Accused Address</label>
+                                        <input type="text" id="accusedAddress" name="accusedAddress" value={currentRecord?.accusedAddress || ''} onChange={(e) => setCurrentRecord({ ...currentRecord, accusedAddress: e.target.value })} required className="p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <div className="flex justify-end space-x-4 mt-6">
+                        <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors">Cancel</button>
+                        <button type="submit" className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                            {isEditing ? 'Save Changes' : 'Create'}
+                        </button>
+                    </div>
+                </form>
             </div>
-        );
-    };
+        </div>
+    );
+};
 
     return (
         <div className="flex min-h-screen bg-gray-50 font-sans text-gray-800">
             <ToastContainer />
-        {isModalOpen && (
+            {/* Sidebar (Unchanged) */}
+            {isModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
                 <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]">
                     {renderModal()}
                 </div>
             </div>
         )}
-            {/* Sidebar (Unchanged) */}
+
             <div className="hidden md:flex w-64 bg-white border-r border-gray-200 p-6 flex-col shadow-lg">
                 <div className="flex items-center mb-8">
                     <FaUsers className="text-3xl text-indigo-600 mr-3" />
@@ -653,14 +655,14 @@ const AdminDashboard = ({ setRole }) => {
                                         className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     />
                                 </FormInput>
-                                
+                                 {/* <button
+                                onClick={() => setSuretyFilters({ policeStation: '', filterYear: '', filterMonth: '' })}
+                                className="mt-4 px-4 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
+                            >
+                                <FaTimes className="mr-2" /> Clear Filters
+                            </button> */}
                             </div>
-                            // <button
-                            //     onClick={() => setSuretyFilters({ policeStation: '', filterYear: '', filterMonth: '' })}
-                            //     className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
-                            // >
-                            //     <FaTimes className="mr-2" /> Clear Filters
-                            // </button>
+                           
                         </div>
                     )}
                     {/* --- Filter Section for Users (Old Simple Filter) --- */}
